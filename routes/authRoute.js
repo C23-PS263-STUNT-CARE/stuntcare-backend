@@ -7,12 +7,17 @@ import {
 } from "../controllers/authController.js";
 import { refreshToken } from "../controllers/refreshToken.js";
 import { verifyToken } from "../middleware/verifyToken.js";
+import {
+  loginValidator,
+  registerValidator,
+  runValidation,
+} from "../validation/authValidation.js";
 
 const router = express.Router();
 
 router.get("/users", verifyToken, getUsers);
-router.post("/users", register);
-router.post("/login", login);
+router.post("/users", runValidation, registerValidator, register);
+router.post("/login", runValidation, loginValidator, login);
 router.get("/token", refreshToken);
 router.delete("/logout", logout);
 
