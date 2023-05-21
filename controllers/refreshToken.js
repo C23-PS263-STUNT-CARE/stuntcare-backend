@@ -20,11 +20,11 @@ export const refreshToken = async (request, response) => {
       (error, decoded) => {
         if (error) response.sendStatus(403);
         const userId = user.id;
-        const firstName = user.first_name;
-        const lastName = user.last_name;
+        const name = user.name;
+
         const email = user.email;
         const accessToken = jwt.sign(
-          { userId, firstName, lastName, email },
+          { userId, name, email },
           process.env.ACCESS_TOKEN_SECRET,
           {
             expiresIn: "15s",

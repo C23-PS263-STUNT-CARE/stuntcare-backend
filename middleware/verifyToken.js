@@ -5,7 +5,13 @@ export const verifyToken = (request, response, next) => {
   const token = authHeader && authHeader.split(" ")[1];
   if (token == null) return response.sendStatus(401);
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
-    if (error) response.sendStatus(403);
+    if (error)
+      response.status(401).json({
+        error: {
+          status: "401 Unauthorized",
+          message: "Silahkan login terlebih dahulu",
+        },
+      });
     request.email = decoded.email;
     next();
   });

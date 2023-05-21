@@ -14,8 +14,7 @@ export const getUsers = async (request, response) => {
 };
 
 export const register = async (request, response) => {
-  const { first_name, last_name, email, password, confPassword, role } =
-    request.body;
+  const { name, email, password, confPassword, role } = request.body;
 
   if (password !== confPassword)
     return response.status(400).json({
@@ -31,8 +30,7 @@ export const register = async (request, response) => {
   try {
     await prisma.user.create({
       data: {
-        first_name: first_name,
-        last_name: last_name,
+        name: name,
         email: email,
         password: hashPassword,
         role: role,
@@ -81,18 +79,17 @@ export const login = async (request, response) => {
       });
 
     const userId = user.id;
-    const firstName = user.first_name;
-    const lastName = user.last_name;
+    const name = user.name;
     const email = user.email;
     const accessToken = jwt.sign(
-      { userId, firstName, lastName, email },
+      { userId, name, email },
       process.env.ACCESS_TOKEN_SECRET,
       {
         expiresIn: "20s",
       }
     );
     const refreshToken = jwt.sign(
-      { userId, firstName, lastName, email },
+      { userId, name, email },
       process.env.REFRESH_TOKEN_SECRET,
       {
         expiresIn: "1d",

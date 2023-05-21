@@ -1,7 +1,7 @@
 import { validationResult } from "express-validator";
 import { body } from "express-validator";
 
-export const runValidation = (request, response, next) => {
+export const runValidation = async (request, response, next) => {
   const errors = validationResult(request);
   if (!errors.isEmpty()) {
     return response.status(400).json({ errors: errors.array() });
@@ -10,7 +10,7 @@ export const runValidation = (request, response, next) => {
 };
 
 export const registerValidator = [
-  body("first_name").notEmpty().withMessage("First name is required"),
+  body("name").notEmpty().withMessage("Name is required"),
   body("email").notEmpty().isEmail().withMessage("Invalid email"),
   body("password")
     .notEmpty()

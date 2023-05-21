@@ -6,6 +6,7 @@ import {
   logout,
 } from "../controllers/authController.js";
 import { refreshToken } from "../controllers/refreshToken.js";
+import { adminOnly } from "../middleware/authUser.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 import {
   loginValidator,
@@ -15,9 +16,9 @@ import {
 
 const router = express.Router();
 
-router.get("/users", verifyToken, getUsers);
-router.post("/users", runValidation, registerValidator, register);
-router.post("/login", runValidation, loginValidator, login);
+router.get("/users", verifyToken, adminOnly, getUsers);
+router.post("/users", registerValidator, runValidation, register);
+router.post("/login", loginValidator, runValidation, login);
 router.get("/token", refreshToken);
 router.delete("/logout", logout);
 
