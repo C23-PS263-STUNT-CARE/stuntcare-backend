@@ -1,13 +1,4 @@
-import { validationResult } from "express-validator";
-import { body } from "express-validator";
-
-export const runValidation = async (request, response, next) => {
-  const errors = validationResult(request);
-  if (!errors.isEmpty()) {
-    return response.status(400).json({ errors: errors.array() });
-  }
-  next();
-};
+import { body } from "../utils/importUtil.js";
 
 export const registerValidator = [
   body("name").notEmpty().withMessage("Name is required"),
