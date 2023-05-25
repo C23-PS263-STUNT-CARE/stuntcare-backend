@@ -35,6 +35,36 @@ export const getUsers = async (request, response) => {
   }
 };
 
+export const getUserById = async (request, response) => {
+  try {
+    const userId = request.params.id;
+
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
+
+    if (!user) {
+      return response
+        .status(404)
+        .json(createErrorResponse("User not found", null));
+    }
+
+    return response
+      .status(200)
+      .json(createSuccessResponse("Fetched user successfully", { user }));
+  } catch (error) {
+    console.log(error);
+    return response
+      .status(500)
+      .json(createErrorResponse("Internal server error"));
+  }
+};
+
 export const register = async (request, response) => {
   const { name, email, password, confPassword } = request.body;
 
