@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.get("/api/v1/users", verifyToken, getUsers);
 router.get("/api/v1/users/:id", verifyToken, getUserById);
-router.post("/api/users", register);
+router.post("/api/register", register);
 router.post("/api/login", login);
 
 export default router;
