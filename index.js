@@ -1,6 +1,10 @@
-import { express, dotenv, cors } from "./src/utils/importUtil.js";
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import bodyParser from "body-parser";
 
-import router from "./src/routes/authRoute.js";
+import adminRouter from "./src/routes/adminRoute.js";
+import userRouter from "./src/routes/authRoute.js";
 
 dotenv.config();
 const app = express();
@@ -12,8 +16,11 @@ app.use(
   })
 );
 
-app.use(express.json());
-app.use(router);
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+app.use(userRouter);
+app.use(adminRouter);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

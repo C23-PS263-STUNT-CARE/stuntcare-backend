@@ -1,20 +1,18 @@
-import {
-  PrismaClient,
-  bcrypt,
-  jwt,
-  nanoid,
-  validationResult,
-} from "../utils/importUtil.js";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { nanoid } from "nanoid";
+import { validationResult } from "express-validator";
 
 import {
   loginValidator,
   registerValidator,
-} from "../validation/authValidation.js";
+} from "../../validation/authValidation.js";
 
 import {
   createSuccessResponse,
   createErrorResponse,
-} from "../utils/responseUtil.js";
+} from "../../utils/responseUtil.js";
 
 const prisma = new PrismaClient();
 
@@ -171,3 +169,94 @@ export const login = async (request, response) => {
     response.status(500).json(createErrorResponse("Internal server error"));
   }
 };
+
+// // Fungsi untuk mengirim permintaan ke API Flask
+// const sendPredictionRequest = async (data) => {
+//   try {
+//     const apiResponse = await axios.post("http://localhost:5000/predict", data);
+//     return apiResponse.data.Stunting;
+//   } catch (error) {
+//     console.error(error);
+//     throw new Error("Failed to get prediction from Flask API");
+//   }
+// };
+
+// // Controller untuk mengecek stunting
+// export const cekStunting = async (request, response) => {
+//   try {
+//     // Data yang akan dikirim ke API Flask
+//     const data = {
+//       Sex: request.body.sex,
+//       Age: parseFloat(request.body.age),
+//       "Birth Weight": parseFloat(request.body.birth_weight),
+//       "Birth Length": parseFloat(request.body.birth_length),
+//       "Body Weight": parseFloat(request.body.body_weight),
+//       "Body Length": parseFloat(request.body.body_length),
+//       "ASI Eksklusif": request.body.asi_eksklusif,
+//     };
+
+//     // Mengirim permintaan POST ke API Flask
+//     const stunting = await sendPredictionRequest(data);
+
+//     // Menyimpan hasil prediksi ke model StuntingData
+//     await prisma.stuntingData.create({
+//       data: {
+//         sex: data.Sex,
+//         age: data.Age,
+//         birth_weight: data["Birth Weight"],
+//         birth_length: data["Birth Length"],
+//         body_weight: data["Body Weight"],
+//         body_length: data["Body Length"],
+//         asi_eksklusif: data["ASI Eksklusif"],
+//         status_stunting: stunting,
+//       },
+//     });
+
+//     // Mengambil data dari model StuntingData
+//     const stuntingData = await prisma.stuntingData.findMany({
+//       select: {
+//         status_stunting: true,
+//       },
+//       orderBy: {
+//         created_at: "desc",
+//       },
+//       take: 1,
+//     });
+
+//     // Mengirim hasil prediksi dan data dari model StuntingData sebagai respons dari Express.js
+//     response.json({ Stunting: stuntingData });
+//   } catch (error) {
+//     console.error(error);
+//     response.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
+// export const statusStunting = async (request, response) => {
+//   try {
+//     const stuntingData = await prisma.stuntingData.findMany({
+//       orderBy: {
+//         created_at: "desc",
+//       },
+//       take: 1,
+//     });
+//     response.json({ Stunting: stuntingData });
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
+
+// export const historyStunting = async (request, response) => {
+//   try {
+//     // Mengambil data dari model StuntingData
+//     const stuntingData = await prisma.stuntingData.findMany({
+//       orderBy: {
+//         created_at: "desc",
+//       },
+//     });
+
+//     // Mengirim hasil prediksi dan data dari model StuntingData sebagai respons dari Express.js
+//     response.json({ Stunting: stuntingData });
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
