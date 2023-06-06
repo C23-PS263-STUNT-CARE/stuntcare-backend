@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 
 import adminRouter from "./src/routes/adminRoute.js";
-import userRouter from "./src/routes/authRoute.js";
+import userRouter from "./src/routes/userRoute.js";
 
 dotenv.config();
 const app = express();

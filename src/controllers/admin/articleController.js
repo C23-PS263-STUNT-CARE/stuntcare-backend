@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import multer from "multer";
-// import path from "path";
+import util from "util";
+import path from "path";
 
 import { Storage } from "@google-cloud/storage";
 
@@ -8,80 +9,74 @@ const prisma = new PrismaClient();
 
 // Konfigurasi penyimpanan file
 
+let processFile = multer({
+  storage: multer.memoryStorage(),
+}).single("file");
+
+let processFileMiddleware = util.promisify(processFile);
+
 const storage = new Storage({
-  projectId: "Project-id-google-cloud",
-  serviceAccount: "service-account.json",
+  projectId: "your_project_id",
+  serviceAccount: "your_service_account.json",
 });
 
-const bucket = storage.bucket("bucket-name");
-
-/* const storage = multer.diskStorage({
-  destination: function (request, file, callback) {
-    callback(null, "src/images/articles");
-  },
-  filename: function (request, file, callback) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    callback(null, uniqueSuffix + ext);
-  },
-}); */
-
-// Inisialisasi multer
-const multerStorage = multer.memoryStorage();
-
-const upload = multer({
-  storage: multerStorage,
-  limits: {
-    fileSize: 1 * 1024 * 1024,
-  },
-});
+const bucket = storage.bucket("your_bucket_name");
 
 export const createArticle = async (request, response) => {
   try {
-    upload.single("image")(request, response, async function (error) {
-      if (error instanceof multer.MulterError) {
-        return response.status(400).json({ message: "Failed to upload image" });
-      } else if (error) {
-        return response.status(500).json({ message: "Internal server error" });
-      }
+    await processFileMiddleware(request, response);
 
-      const { title, excerpt, content } = request.body;
-      const imageFile = request.file;
+    if (!request.file) {
+      return response.status(400).json({ message: "Please upload a file!" });
+    }
 
-      const publishedAt = new Date();
+    const { title, excerpt, content } = request.body;
+    const imageFile = request.file;
 
-      // Generate a unique filename for the uploaded image
-      const filename =
-        Date.now() +
-        "-" +
-        Math.round(Math.random() * 1e9) +
-        path.extname(imageFile.originalname);
+    const publishedAt = new Date();
 
-      // Create a write stream to upload the file to Google Cloud Storage
-      const fileStream = bucket.file(filename).createWriteStream();
+    const filename =
+      Date.now() +
+      "-" +
+      Math.round(Math.random() * 1e9) +
+      path.extname(imageFile.originalname);
 
-      fileStream.on("error", () => {
-        response.status(500).json({ message: "Failed to upload image" });
-      });
+    // Create a write stream to upload the file to Google Cloud Storage
+    const fileStream = bucket.file(filename).createWriteStream();
 
-      fileStream.on("finish", async () => {
+    fileStream.on("error", () => {
+      response.status(500).json({ message: "Failed to upload image" });
+    });
+
+    const imageUrl = `https://storage.googleapis.com/${bucket.name}/${filename}`;
+
+    fileStream.on("finish", async () => {
+      try {
         await prisma.articles.create({
           data: {
             title,
             excerpt,
             content,
             published_at: publishedAt,
-            image: filename,
+            image: imageUrl,
           },
         });
-      });
 
-      response.status(201).json({ message: "Article Created" });
+        const file = bucket.file(filename);
+        await file.makePublic();
 
-      fileStream.end(imageFile.buffer);
+        response.status(201).json({ message: "Article Created" });
+      } catch (error) {
+        console.log(error);
+        response.status(500).json({ message: "Internal server error" });
+      }
     });
+
+    response.status(201).json({ message: "Article Created" });
+
+    fileStream.end(imageFile.buffer);
   } catch (error) {
-    console.log(error); // Cetak pesan kesalahan ke konsol
+    console.log(error);
     response.status(500).json({ message: "Internal server error" });
   }
 };

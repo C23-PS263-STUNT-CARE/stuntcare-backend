@@ -1,12 +1,7 @@
 import { express } from "../utils/importUtil.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 
-import {
-  getUsers,
-  getUserById,
-  login,
-  register,
-} from "../controllers/user/authController.js";
+import { login, register } from "../controllers/user/authController.js";
 
 import {
   getArticles,
@@ -22,14 +17,12 @@ import {
 const router = express.Router();
 
 /* Authentication and Authorization */
-router.get("/api/v1/users", verifyToken, getUsers);
-router.get("/api/v1/users/:id", verifyToken, getUserById);
 router.post("/api/register", register);
 router.post("/api/login", login);
 
 /* Article */
-router.get("/api/v1/articles", getArticles);
-router.get("/api/v1/articles/latest", getLatestArticles);
+router.get("/api/v1/articles", verifyToken, getArticles);
+router.get("/api/v1/articles/latest", verifyToken, getLatestArticles);
 
 /* Toddler */
 router.post("/toddlers/:userId", verifyToken, createToddler);
