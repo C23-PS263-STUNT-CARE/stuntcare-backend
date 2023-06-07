@@ -16,21 +16,12 @@ model Users {
   name     String
   password String
   token    String?    @db.Text
-  toddlers Toddlers[]
+  stunting Stunting[]
 }
 
-model Toddlers {
-  id   Int    @id @default(autoincrement())
-  name String
-
-  user    Users  @relation(fields: [user_id], references: [id])
-  user_id String
-
-  stunting_data StuntingData[]
-}
-
-model StuntingData {
+model Stunting {
   id              Int    @id @default(autoincrement())
+  name            String
   sex             String
   age             Float
   birth_weight    Float
@@ -40,10 +31,8 @@ model StuntingData {
   asi_eksklusif   String
   status_stunting String
 
-  toddler    Toddlers @relation(fields: [toddler_id], references: [id])
-  toddler_id Int
-
-  created_at DateTime @default(now())
+  user    Users  @relation(fields: [user_id], references: [id])
+  user_id String
 }
 
 model Articles {

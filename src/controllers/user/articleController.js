@@ -40,6 +40,37 @@ export const getArticles = async (request, response) => {
   }
 };
 
+export const getArticleById = async (request, response) => {
+  try {
+    const { articleId } = request.params;
+
+    const article = await prisma.articles.findUnique({
+      where: { id: parseInt(articleId) },
+    });
+
+    if (!article) {
+      return response
+        .status(404)
+        .json(createErrorResponse("Article not found"));
+    }
+
+    const formattedDate = format(
+      new Date(article.published_at),
+      "dd MMMM yyyy",
+      { locale: id }
+    );
+
+    const formattedArticle = { ...article, published_at: formattedDate };
+
+    response
+      .status(200)
+      .json(createSuccessResponse("Fetched article success", formattedArticle));
+  } catch (error) {
+    console.log(error);
+    response.status(500).json(createErrorResponse("Internal server error"));
+  }
+};
+
 export const getLatestArticles = async (request, response) => {
   try {
     const articles = await prisma.articles.findMany({

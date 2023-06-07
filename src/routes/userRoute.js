@@ -4,6 +4,7 @@ import { verifyToken } from "../middleware/verifyToken.js";
 import { login, register } from "../controllers/user/authController.js";
 
 import {
+  getArticleById,
   getArticles,
   getLatestArticles,
 } from "../controllers/user/articleController.js";
@@ -11,7 +12,6 @@ import { createToddler } from "../controllers/user/toddlerController.js";
 import {
   cekStunting,
   historyStunting,
-  statusStunting,
 } from "../controllers/user/stuntingController.js";
 
 const router = express.Router();
@@ -21,15 +21,15 @@ router.post("/api/register", register);
 router.post("/api/login", login);
 
 /* Article */
-router.get("/api/v1/articles", verifyToken, getArticles);
-router.get("/api/v1/articles/latest", verifyToken, getLatestArticles);
+router.get("/api/v1/articles", getArticles);
+router.get("/api/v1/articles/:articleId", getArticleById);
+router.get("/api/v1/articles/latest", getLatestArticles);
 
 /* Toddler */
-router.post("/toddlers/:userId", verifyToken, createToddler);
+router.post("/toddlers/:userId", createToddler);
 
 /* Stunting */
-router.post("/cek/:userId/:toddlerId", verifyToken, cekStunting);
-router.get("/status/:userId/:toddlerId", verifyToken, statusStunting);
-router.get("/history/:userId/:toddlerId", verifyToken, historyStunting);
+router.post("/cek/:userId", cekStunting);
+router.get("/history/:userId/:toddlerId", historyStunting);
 
 export default router;

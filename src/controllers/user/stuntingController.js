@@ -11,8 +11,11 @@ const prisma = new PrismaClient();
 
 const sendPredictionRequest = async (data) => {
   try {
-    const apiResponse = await axios.post("http://localhost:5000/predict", data);
-    return apiResponse.data.Stunting;
+    const apiResponse = await axios.post(
+      "https://predict-calqdofn4a-et.a.run.app/predict",
+      data
+    );
+    return apiResponse.data.stunting;
   } catch (error) {
     console.error(error);
     throw new Error("Failed to get prediction from Flask API");
@@ -23,61 +26,48 @@ const sendPredictionRequest = async (data) => {
 export const cekStunting = async (request, response) => {
   try {
     const userId = request.params.userId;
-    const toddlerId = parseInt(request.params.toddlerId);
 
-    // Mengambil data toddler berdasarkan id dan user id
-    const toddler = await prisma.toddlers.findFirst({
+    const user = await prisma.users.findUnique({
       where: {
-        user_id: userId,
+        id: userId,
       },
     });
 
-    if (!toddler) {
-      return response
-        .status(404)
-        .json(createErrorResponse("Toddler not found"));
+    if (!user) {
+      return response.status(404).json(createErrorResponse("User not found"));
     }
 
     // Data yang akan dikirim ke API Flask
     const data = {
-      Sex: request.body.sex,
-      Age: parseFloat(request.body.age),
-      "Birth Weight": parseFloat(request.body.birth_weight),
-      "Birth Length": parseFloat(request.body.birth_length),
-      "Body Weight": parseFloat(request.body.body_weight),
-      "Body Length": parseFloat(request.body.body_length),
-      "ASI Eksklusif": request.body.asi_eksklusif,
+      sex: request.body.sex,
+      age: parseFloat(request.body.age),
+      birth_weight: parseFloat(request.body.birth_weight),
+      birth_length: parseFloat(request.body.birth_length),
+      body_weight: parseFloat(request.body.body_weight),
+      body_length: parseFloat(request.body.body_length),
+      asi_ekslusif: request.body.asi_eksklusif,
     };
 
     // Mengirim permintaan POST ke API Flask
     const stunting = await sendPredictionRequest(data);
 
     // Menyimpan hasil prediksi ke model StuntingData
-    await prisma.stuntingData.create({
+    const stuntingCheck = await prisma.stunting.create({
       data: {
-        sex: data.Sex,
-        age: data.Age,
-        birth_weight: data["Birth Weight"],
-        birth_length: data["Birth Length"],
-        body_weight: data["Body Weight"],
-        body_length: data["Body Length"],
-        asi_eksklusif: data["ASI Eksklusif"],
+        name: request.body.name,
+        sex: data.sex,
+        age: data.age,
+        birth_weight: data.birth_weight,
+        birth_length: data.birth_length,
+        body_weight: data.body_weight,
+        body_length: data.body_length,
+        asi_eksklusif: data.asi_ekslusif,
         status_stunting: stunting,
-        toddler: {
+        user: {
           connect: {
-            id: toddler.id,
+            id: user.id,
           },
         },
-      },
-    });
-
-    // Mengambil data terbaru dari model StuntingData berdasarkan toddlerId
-    const stuntingCheck = await prisma.stuntingData.findFirst({
-      where: {
-        toddler_id: toddlerId,
-      },
-      orderBy: {
-        created_at: "desc",
       },
     });
 
@@ -95,71 +85,22 @@ export const cekStunting = async (request, response) => {
   }
 };
 
-export const statusStunting = async (request, response) => {
-  try {
-    const userId = request.params.userId;
-    const toddlerId = parseInt(request.params.toddlerId);
-
-    // Mengambil data toddler berdasarkan id dan user id
-    const toddler = await prisma.toddlers.findFirst({
-      where: {
-        user_id: userId,
-      },
-    });
-
-    if (!toddler) {
-      return response
-        .status(404)
-        .json(createErrorResponse("Toddler not found"));
-    }
-
-    // Mengambil data terbaru dari model StuntingData berdasarkan toddlerId
-    const latestStuntingData = await prisma.stuntingData.findFirst({
-      where: {
-        toddler_id: toddlerId,
-      },
-      orderBy: {
-        created_at: "desc",
-      },
-      take: 1,
-    });
-
-    response
-      .status(200)
-      .json(
-        createSuccessResponse(
-          "Fetched data status stunting successfully",
-          latestStuntingData
-        )
-      );
-  } catch (error) {
-    console.log(error);
-    return response
-      .status(500)
-      .json(createErrorResponse("Internal server error"));
-  }
-};
-
 export const historyStunting = async (request, response) => {
   try {
     const userId = request.params.userId;
-    const toddlerId = parseInt(request.params.toddlerId);
 
-    // Mengambil data toddler berdasarkan id dan user id
-    const toddler = await prisma.toddlers.findFirst({
+    const user = await prisma.users.findUnique({
       where: {
-        user_id: userId,
+        id: userId,
       },
     });
 
-    if (!toddler) {
-      return response
-        .status(404)
-        .json(createErrorResponse("Toddler not found"));
+    if (!user) {
+      return response.status(404).json(createErrorResponse("User not found"));
     }
 
     // Mengambil data terbaru dari model StuntingData berdasarkan toddlerId
-    const historyCheck = await prisma.stuntingData.findMany({
+    const historyCheck = await prisma.stunting.findMany({
       where: {
         toddler_id: toddlerId,
       },
