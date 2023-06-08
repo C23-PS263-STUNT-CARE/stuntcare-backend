@@ -1,14 +1,18 @@
 import express from "express";
-import {
-  createArticle,
-  deleteArticle,
-} from "../controllers/admin/articleController.js";
+import { createArticle } from "../controllers/admin/articleController.js";
 import { createInfo } from "../controllers/admin/infoController.js";
+
+import { verifyToken } from "../middleware/verifyToken.js";
+
+import { login, register } from "../controllers/admin/authController.js";
 
 const router = express.Router();
 
+/* Authentication and Authorization */
+router.post("/api/admin/register", register);
+router.post("/api/admin/login", login);
+
 router.post("/articles", createArticle);
-router.delete("/articles/:id", deleteArticle);
 
 router.post("/info", createInfo);
 

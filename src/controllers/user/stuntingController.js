@@ -1,20 +1,14 @@
-import { PrismaClient } from "../../utils/importUtil.js";
-
+import User from "../../models/userModel.js";
+import Stunting from "../../models/stuntingModel.js";
 import {
   createSuccessResponse,
   createErrorResponse,
 } from "../../utils/responseUtil.js";
-
 import axios from "axios";
-
-const prisma = new PrismaClient();
 
 const sendPredictionRequest = async (data) => {
   try {
-    const apiResponse = await axios.post(
-      "https://predict-calqdofn4a-et.a.run.app/predict",
-      data
-    );
+    const apiResponse = await axios.post("http://127.0.0.1:5000/predict", data);
     return apiResponse.data.stunting;
   } catch (error) {
     console.error(error);
@@ -27,11 +21,7 @@ export const cekStunting = async (request, response) => {
   try {
     const userId = request.params.userId;
 
-    const user = await prisma.users.findUnique({
-      where: {
-        id: userId,
-      },
-    });
+    const user = await User.findByPk(userId);
 
     if (!user) {
       return response.status(404).json(createErrorResponse("User not found"));
@@ -51,24 +41,18 @@ export const cekStunting = async (request, response) => {
     // Mengirim permintaan POST ke API Flask
     const stunting = await sendPredictionRequest(data);
 
-    // Menyimpan hasil prediksi ke model StuntingData
-    const stuntingCheck = await prisma.stunting.create({
-      data: {
-        name: request.body.name,
-        sex: data.sex,
-        age: data.age,
-        birth_weight: data.birth_weight,
-        birth_length: data.birth_length,
-        body_weight: data.body_weight,
-        body_length: data.body_length,
-        asi_eksklusif: data.asi_ekslusif,
-        status_stunting: stunting,
-        user: {
-          connect: {
-            id: user.id,
-          },
-        },
-      },
+    // Menyimpan hasil prediksi ke model Stunting
+    const stuntingCheck = await Stunting.create({
+      name: request.body.name,
+      sex: data.sex,
+      age: data.age,
+      birth_weight: data.birth_weight,
+      birth_length: data.birth_length,
+      body_weight: data.body_weight,
+      body_length: data.body_length,
+      asi_eksklusif: data.asi_eksklusif,
+      status_stunting: stunting,
+      user_id: user.id,
     });
 
     // Mengirim hasil prediksi sebagai respons dari Express.js
@@ -85,37 +69,58 @@ export const cekStunting = async (request, response) => {
   }
 };
 
-export const historyStunting = async (request, response) => {
+// Controller untuk mendapatkan semua data stunting berdasarkan ID pengguna
+export const getAllStuntingByUserId = async (request, response) => {
   try {
     const userId = request.params.userId;
 
-    const user = await prisma.users.findUnique({
-      where: {
-        id: userId,
-      },
-    });
+    const user = await User.findByPk(userId);
 
     if (!user) {
       return response.status(404).json(createErrorResponse("User not found"));
     }
 
-    // Mengambil data terbaru dari model StuntingData berdasarkan toddlerId
-    const historyCheck = await prisma.stunting.findMany({
-      where: {
-        toddler_id: toddlerId,
-      },
-      orderBy: {
-        created_at: "desc",
-      },
+    const stunting = await Stunting.findAll({
+      where: { user_id: userId },
     });
 
+    if (!stunting || stunting.length === 0) {
+      return response
+        .status(404)
+        .json(createErrorResponse("No stunting data found for this user"));
+    }
+
+    // Mengirim hasil data stunting sebagai respons dari Express.js
     response
       .status(200)
       .json(
-        createSuccessResponse(
-          "Fetched data history stunting successfully",
-          historyCheck
-        )
+        createSuccessResponse("Stunting data retrieved successfully", stunting)
+      );
+  } catch (error) {
+    console.log(error);
+    return response
+      .status(500)
+      .json(createErrorResponse("Internal server error"));
+  }
+};
+
+export const historyStuntingById = async (request, response) => {
+  try {
+    const stuntingId = request.params.stuntingId;
+
+    const stunting = await Stunting.findByPk(stuntingId);
+
+    if (!stunting) {
+      return response
+        .status(404)
+        .json(createErrorResponse("Stunting data not found"));
+    }
+
+    // Mengirim hasil data stunting sebagai respons dari Express.js
+    response
+      .status(200)
+      .json(
+        createSuccessResponse("Stunting data retrieved successfully", stunting)
       );
   } catch (error) {
     console.log(error);

@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import Info from "../../models/infoModel.js";
 import multer from "multer";
 import path from "path";
-
-const prisma = new PrismaClient();
 
 // Konfigurasi penyimpanan file
 const storage = multer.diskStorage({
@@ -30,7 +28,7 @@ export const createInfo = async (request, response) => {
 
       const image = request.file ? request.file.filename : null;
 
-      await prisma.info.create({
+      await Info.create({
         data: {
           image_url: image,
         },

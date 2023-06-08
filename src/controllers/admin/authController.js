@@ -1,4 +1,4 @@
-import User from "../../models/userModel.js";
+import Admin from "../../models/adminModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { nanoid } from "nanoid";
@@ -31,13 +31,13 @@ export const register = async (request, response) => {
   }
 
   try {
-    const existingUser = await User.findOne({
+    const existingAdmin = await Admin.findOne({
       where: {
         email: email,
       },
     });
 
-    if (existingUser) {
+    if (existingAdmin) {
       return response
         .status(400)
         .json(createErrorResponse("Email already exists"));
@@ -46,10 +46,10 @@ export const register = async (request, response) => {
     const salt = await bcrypt.genSalt();
     const hashPassword = await bcrypt.hash(password, salt);
 
-    const userId = nanoid();
+    const adminId = nanoid();
 
-    await User.create({
-      id: userId,
+    await Admin.create({
+      id: adminId,
       name: name,
       email: email,
       password: hashPassword,
@@ -74,42 +74,42 @@ export const login = async (request, response) => {
   }
 
   try {
-    const user = await User.findOne({
+    const admin = await Admin.findOne({
       where: {
         email: request.body.email,
       },
     });
 
-    if (!user) {
+    if (!admin) {
       return response.status(404).json(createErrorResponse("Email not found"));
     }
 
-    const match = await bcrypt.compare(request.body.password, user.password);
+    const match = await bcrypt.compare(request.body.password, admin.password);
     if (!match)
       return response.status(400).json(createErrorResponse("Wrong password"));
 
-    const userId = user.id;
-    const name = user.name;
-    const email = user.email;
+    const adminId = admin.id;
+    const name = admin.name;
+    const email = admin.email;
     const accessToken = jwt.sign(
-      { userId, name, email },
+      { adminId, name, email },
       process.env.ACCESS_TOKEN_SECRET
     );
 
-    await User.update(
+    await Admin.update(
       {
         token: accessToken,
       },
       {
         where: {
-          id: userId,
+          id: adminId,
         },
       }
     );
 
     response.status(200).json(
       createSuccessResponse("Login success", {
-        id: userId,
+        id: adminId,
         name: name,
         email: email,
         token: accessToken,

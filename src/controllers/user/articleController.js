@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import Article from "../../models/articleModel.js";
 import { format } from "date-fns";
 import { id } from "date-fns/locale/index.js";
 
@@ -7,11 +7,9 @@ import {
   createErrorResponse,
 } from "../../utils/responseUtil.js";
 
-const prisma = new PrismaClient();
-
 export const getArticles = async (request, response) => {
   try {
-    const articles = await prisma.articles.findMany();
+    const articles = await Article.findAll();
 
     if (articles.length === 0) {
       return response
@@ -26,7 +24,7 @@ export const getArticles = async (request, response) => {
         { locale: id }
       );
 
-      return { ...article, published_at: formattedDate };
+      return { ...article.toJSON(), published_at: formattedDate };
     });
 
     response
@@ -44,9 +42,7 @@ export const getArticleById = async (request, response) => {
   try {
     const { articleId } = request.params;
 
-    const article = await prisma.articles.findUnique({
-      where: { id: parseInt(articleId) },
-    });
+    const article = await Article.findByPk(articleId);
 
     if (!article) {
       return response
@@ -60,7 +56,10 @@ export const getArticleById = async (request, response) => {
       { locale: id }
     );
 
-    const formattedArticle = { ...article, published_at: formattedDate };
+    const formattedArticle = {
+      ...article.toJSON(),
+      published_at: formattedDate,
+    };
 
     response
       .status(200)
@@ -73,9 +72,9 @@ export const getArticleById = async (request, response) => {
 
 export const getLatestArticles = async (request, response) => {
   try {
-    const articles = await prisma.articles.findMany({
-      orderBy: { published_at: "desc" },
-      take: 5, // Mengambil 5 artikel terbaru
+    const articles = await Article.findAll({
+      order: [["published_at", "DESC"]],
+      limit: 5, // Mengambil 5 artikel terbaru
     });
 
     if (articles.length === 0) {
@@ -91,7 +90,7 @@ export const getLatestArticles = async (request, response) => {
         { locale: id }
       );
 
-      return { ...article, published_at: formattedDate };
+      return { ...article.toJSON(), published_at: formattedDate };
     });
 
     response.status(200).json(
