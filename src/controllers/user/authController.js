@@ -26,7 +26,7 @@ export const register = async (request, response) => {
   if (!errors.isEmpty()) {
     const errorMessages = errors.array().map((error) => error.msg);
     return response
-      .status(400)
+      .status(200)
       .json(createErrorResponse(errorMessages.join(", ")));
   }
 
@@ -39,7 +39,7 @@ export const register = async (request, response) => {
 
     if (existingUser) {
       return response
-        .status(400)
+        .status(200)
         .json(createErrorResponse("Email already exists"));
     }
 
@@ -70,7 +70,7 @@ export const login = async (request, response) => {
 
   if (!errors.isEmpty()) {
     const errorMessages = errors.array().map((error) => error.msg);
-    return response.status(400).json(createErrorResponse(errorMessages));
+    return response.status(200).json(createErrorResponse(errorMessages));
   }
 
   try {
@@ -81,12 +81,12 @@ export const login = async (request, response) => {
     });
 
     if (!user) {
-      return response.status(404).json(createErrorResponse("Email not found"));
+      return response.status(200).json(createErrorResponse("Email not found"));
     }
 
     const match = await bcrypt.compare(request.body.password, user.password);
     if (!match)
-      return response.status(400).json(createErrorResponse("Wrong password"));
+      return response.status(200).json(createErrorResponse("Wrong password"));
 
     const userId = user.id;
     const name = user.name;

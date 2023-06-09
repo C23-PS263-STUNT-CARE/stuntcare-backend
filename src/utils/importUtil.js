@@ -7,9 +7,6 @@ import cors from "cors";
 /* dotenv */
 import dotenv from "dotenv";
 
-/* Prisma Schema */
-import { PrismaClient } from "@prisma/client";
-
 /* JSON Web Token */
 import jwt from "jsonwebtoken";
 
@@ -23,14 +20,17 @@ import { nanoid } from "nanoid";
 import { validationResult } from "express-validator";
 import { body } from "express-validator";
 
+/* Database */
+import { Sequelize } from "sequelize";
+
 export {
   express,
   cors,
   dotenv,
-  PrismaClient,
   jwt,
   bcrypt,
   nanoid,
   validationResult,
   body,
+  Sequelize,
 };

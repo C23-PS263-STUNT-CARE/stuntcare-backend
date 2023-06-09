@@ -14,16 +14,19 @@ const Article = db.define(
     title: {
       type: DataTypes.STRING,
     },
-    excerpt: {
-      type: DataTypes.STRING,
-    },
     content: {
       type: DataTypes.TEXT,
     },
-    image: {
+    image_url: {
       type: DataTypes.STRING,
     },
-    tag: {
+    label: {
+      type: DataTypes.STRING,
+    },
+    published_at: {
+      type: DataTypes.STRING,
+    },
+    author: {
       type: DataTypes.STRING,
     },
   },

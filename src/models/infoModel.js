@@ -1,6 +1,5 @@
 import { Sequelize } from "sequelize";
 import db from "../config/Database.js";
-import Admin from "./adminModel.js";
 
 const { DataTypes } = Sequelize;
 
@@ -13,6 +12,9 @@ const Info = db.define(
       autoIncrement: true,
     },
     image_url: {
+      type: DataTypes.STRING,
+    },
+    url: {
       type: DataTypes.STRING,
     },
   },

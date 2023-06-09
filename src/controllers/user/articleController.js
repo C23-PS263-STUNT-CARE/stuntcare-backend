@@ -1,37 +1,45 @@
 import Article from "../../models/articleModel.js";
-import { format } from "date-fns";
-import { id } from "date-fns/locale/index.js";
-
 import {
-  createSuccessResponse,
   createErrorResponse,
+  createSuccessResponse,
 } from "../../utils/responseUtil.js";
 
 export const getArticles = async (request, response) => {
   try {
-    const articles = await Article.findAll();
+    const { latest } = request.query;
+    let articles;
 
-    if (articles.length === 0) {
-      return response
-        .status(404)
-        .json(createErrorResponse("No articles found"));
+    if (latest) {
+      articles = await Article.findAll({
+        attributes: [
+          "id",
+          "title",
+          "content",
+          "image_url",
+          "label",
+          "published_at",
+          "author",
+        ],
+        order: [["createdAt", "DESC"]],
+        limit: parseInt(latest),
+      });
+    } else {
+      articles = await Article.findAll({
+        attributes: [
+          "id",
+          "title",
+          "content",
+          "image_url",
+          "label",
+          "published_at",
+          "author",
+        ],
+      });
     }
-
-    const formattedArticles = articles.map((article) => {
-      const formattedDate = format(
-        new Date(article.published_at),
-        "dd MMMM yyyy",
-        { locale: id }
-      );
-
-      return { ...article.toJSON(), published_at: formattedDate };
-    });
 
     response
       .status(200)
-      .json(
-        createSuccessResponse("Fetched data success", { formattedArticles })
-      );
+      .json(createSuccessResponse("Fetch data successfully", articles));
   } catch (error) {
     console.log(error);
     response.status(500).json(createErrorResponse("Internal server error"));
@@ -39,65 +47,32 @@ export const getArticles = async (request, response) => {
 };
 
 export const getArticleById = async (request, response) => {
-  try {
-    const { articleId } = request.params;
+  const { articleId } = request.params;
 
-    const article = await Article.findByPk(articleId);
+  try {
+    const article = await Article.findByPk(articleId, {
+      attributes: [
+        "id",
+        "title",
+        "content",
+        "image_url",
+        "label",
+        "published_at",
+        "author",
+      ],
+    });
 
     if (!article) {
       return response
-        .status(404)
-        .json(createErrorResponse("Article not found"));
+        .status(200)
+        .json(createErrorResponse("Article Not Found"));
     }
-
-    const formattedDate = format(
-      new Date(article.published_at),
-      "dd MMMM yyyy",
-      { locale: id }
-    );
-
-    const formattedArticle = {
-      ...article.toJSON(),
-      published_at: formattedDate,
-    };
 
     response
       .status(200)
-      .json(createSuccessResponse("Fetched article success", formattedArticle));
-  } catch (error) {
-    console.log(error);
-    response.status(500).json(createErrorResponse("Internal server error"));
-  }
-};
-
-export const getLatestArticles = async (request, response) => {
-  try {
-    const articles = await Article.findAll({
-      order: [["published_at", "DESC"]],
-      limit: 5, // Mengambil 5 artikel terbaru
-    });
-
-    if (articles.length === 0) {
-      return response
-        .status(404)
-        .json(createErrorResponse("No articles found"));
-    }
-
-    const formattedArticles = articles.map((article) => {
-      const formattedDate = format(
-        new Date(article.published_at),
-        "dd MMMM yyyy",
-        { locale: id }
+      .json(
+        createSuccessResponse("Fetch data article by id successfully", article)
       );
-
-      return { ...article.toJSON(), published_at: formattedDate };
-    });
-
-    response.status(200).json(
-      createSuccessResponse("Fetched latest articles success", {
-        formattedArticles,
-      })
-    );
   } catch (error) {
     console.log(error);
     response.status(500).json(createErrorResponse("Internal server error"));

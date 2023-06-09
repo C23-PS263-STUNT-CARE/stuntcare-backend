@@ -9,14 +9,13 @@ import axios from "axios";
 const sendPredictionRequest = async (data) => {
   try {
     const apiResponse = await axios.post("http://127.0.0.1:5000/predict", data);
-    return apiResponse.data.stunting;
+    return apiResponse.data.prediction;
   } catch (error) {
     console.error(error);
     throw new Error("Failed to get prediction from Flask API");
   }
 };
 
-// Controller untuk mengecek stunting
 export const cekStunting = async (request, response) => {
   try {
     const userId = request.params.userId;
@@ -24,10 +23,9 @@ export const cekStunting = async (request, response) => {
     const user = await User.findByPk(userId);
 
     if (!user) {
-      return response.status(404).json(createErrorResponse("User not found"));
+      return response.status(200).json(createErrorResponse("User not found"));
     }
 
-    // Data yang akan dikirim ke API Flask
     const data = {
       sex: request.body.sex,
       age: parseFloat(request.body.age),
@@ -38,10 +36,8 @@ export const cekStunting = async (request, response) => {
       asi_ekslusif: request.body.asi_eksklusif,
     };
 
-    // Mengirim permintaan POST ke API Flask
-    const stunting = await sendPredictionRequest(data);
+    const prediction = await sendPredictionRequest(data);
 
-    // Menyimpan hasil prediksi ke model Stunting
     const stuntingCheck = await Stunting.create({
       name: request.body.name,
       sex: data.sex,
@@ -50,12 +46,11 @@ export const cekStunting = async (request, response) => {
       birth_length: data.birth_length,
       body_weight: data.body_weight,
       body_length: data.body_length,
-      asi_eksklusif: data.asi_eksklusif,
-      status_stunting: stunting,
+      asi_eksklusif: data.asi_ekslusif,
+      status_stunting: prediction,
       user_id: user.id,
     });
 
-    // Mengirim hasil prediksi sebagai respons dari Express.js
     response
       .status(201)
       .json(
@@ -69,7 +64,6 @@ export const cekStunting = async (request, response) => {
   }
 };
 
-// Controller untuk mendapatkan semua data stunting berdasarkan ID pengguna
 export const getAllStuntingByUserId = async (request, response) => {
   try {
     const userId = request.params.userId;
@@ -77,7 +71,7 @@ export const getAllStuntingByUserId = async (request, response) => {
     const user = await User.findByPk(userId);
 
     if (!user) {
-      return response.status(404).json(createErrorResponse("User not found"));
+      return response.status(200).json(createErrorResponse("User not found"));
     }
 
     const stunting = await Stunting.findAll({
@@ -86,11 +80,10 @@ export const getAllStuntingByUserId = async (request, response) => {
 
     if (!stunting || stunting.length === 0) {
       return response
-        .status(404)
+        .status(200)
         .json(createErrorResponse("No stunting data found for this user"));
     }
 
-    // Mengirim hasil data stunting sebagai respons dari Express.js
     response
       .status(200)
       .json(
@@ -112,11 +105,10 @@ export const historyStuntingById = async (request, response) => {
 
     if (!stunting) {
       return response
-        .status(404)
+        .status(200)
         .json(createErrorResponse("Stunting data not found"));
     }
 
-    // Mengirim hasil data stunting sebagai respons dari Express.js
     response
       .status(200)
       .json(

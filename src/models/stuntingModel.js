@@ -37,7 +37,7 @@ const Stunting = db.define(
       type: DataTypes.STRING,
     },
     status_stunting: {
-      type: DataTypes.STRING,
+      type: DataTypes.FLOAT,
     },
     user_id: {
       type: DataTypes.STRING,

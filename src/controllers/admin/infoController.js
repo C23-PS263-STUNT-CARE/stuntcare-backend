@@ -1,43 +1,36 @@
 import Info from "../../models/infoModel.js";
-import multer from "multer";
-import path from "path";
-
-// Konfigurasi penyimpanan file
-const storage = multer.diskStorage({
-  destination: function (request, file, callback) {
-    callback(null, "src/images/articles");
-  },
-  filename: function (request, file, callback) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    callback(null, uniqueSuffix + ext);
-  },
-});
-
-// Inisialisasi multer
-const upload = multer({ storage: storage });
 
 export const createInfo = async (request, response) => {
+  const { image_url, url } = request.body;
+
   try {
-    upload.single("image")(request, response, async function (error) {
-      if (error instanceof multer.MulterError) {
-        return response.status(400).json({ message: "Failed to upload image" });
-      } else if (error) {
-        return response.status(500).json({ message: "Internal server error" });
-      }
-
-      const image = request.file ? request.file.filename : null;
-
-      await Info.create({
-        data: {
-          image_url: image,
-        },
-      });
-
-      response.status(201).json({ message: "Info Created" });
+    await Info.create({
+      image_url,
+      url,
     });
+
+    response.status(201).json({ message: "Info Created" });
   } catch (error) {
-    console.log(error); // Cetak pesan kesalahan ke konsol
+    console.log(error);
+    response.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const deleteInfoById = async (request, response) => {
+  const { infoId } = request.params;
+
+  try {
+    const info = await Info.findByPk(infoId);
+
+    if (!info) {
+      return response.status(200).json({ message: "Info not found" });
+    }
+
+    await info.destroy();
+
+    response.status(200).json({ message: "Info deleted successfully" });
+  } catch (error) {
+    console.log(error);
     response.status(500).json({ message: "Internal server error" });
   }
 };
