@@ -97,11 +97,20 @@ export const getAllStuntingByUserId = async (request, response) => {
   }
 };
 
-export const historyStuntingById = async (request, response) => {
+export const getStuntingById = async (request, response) => {
   try {
+    const userId = request.params.userId;
     const stuntingId = request.params.stuntingId;
 
-    const stunting = await Stunting.findByPk(stuntingId);
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return response.status(200).json(createErrorResponse("User not found"));
+    }
+
+    const stunting = await Stunting.findOne({
+      where: { id: stuntingId, user_id: userId },
+    });
 
     if (!stunting) {
       return response
