@@ -22,6 +22,10 @@ app.use(bodyParser.json());
 app.use(userRouter);
 app.use(adminRouter);
 
+app.get("/", (request, response) => {
+  response.send("API is running");
+});
+
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server is up and listening at port: ${PORT}`);

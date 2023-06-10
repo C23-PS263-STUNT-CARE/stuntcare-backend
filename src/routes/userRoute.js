@@ -5,6 +5,8 @@ import { login, register } from "../controllers/user/authController.js";
 
 import {
   cekStunting,
+  deleteStuntingById,
+  editStuntingById,
   getAllStuntingByUserId,
   getStuntingById,
 } from "../controllers/user/stuntingController.js";
@@ -30,13 +32,10 @@ router.get("/api/v1/articles/:articleId", verifyToken, getArticleById);
 router.get("/api/v1/info", verifyToken, getInfo);
 
 /* Stunting */
-router.post("/api/v1/ceknt/:userId", cekStunting);
-router.get("/api/v1/historynt/:userId", getAllStuntingByUserId);
-router.get("/users/:userId/stuntingnt/:stuntingId", getStuntingById);
-
-/* Stunting */
 router.post("/api/v1/cek/:userId", verifyToken, cekStunting);
 router.get("/api/v1/history/:userId", verifyToken, getAllStuntingByUserId);
 router.get("/api/v1/stunting/:userId/:stuntingId", getStuntingById);
+router.put("/api/v1/stunting/:userId/:stuntingId", editStuntingById);
+router.delete("/api/v1/stunting/:userId/:stuntingId", deleteStuntingById);
 
 export default router;

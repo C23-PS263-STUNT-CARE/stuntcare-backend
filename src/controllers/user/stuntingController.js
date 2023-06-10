@@ -130,3 +130,95 @@ export const getStuntingById = async (request, response) => {
       .json(createErrorResponse("Internal server error"));
   }
 };
+
+export const editStuntingById = async (request, response) => {
+  try {
+    const userId = request.params.userId;
+    const stuntingId = request.params.stuntingId;
+
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return response.status(200).json(createErrorResponse("User not found"));
+    }
+
+    const stunting = await Stunting.findOne({
+      where: { id: stuntingId, user_id: userId },
+    });
+
+    if (!stunting) {
+      return response
+        .status(200)
+        .json(createErrorResponse("Stunting data not found"));
+    }
+
+    const data = {
+      sex: request.body.sex,
+      age: parseFloat(request.body.age),
+      birth_weight: parseFloat(request.body.birth_weight),
+      birth_length: parseFloat(request.body.birth_length),
+      body_weight: parseFloat(request.body.body_weight),
+      body_length: parseFloat(request.body.body_length),
+      asi_ekslusif: request.body.asi_eksklusif,
+    };
+
+    const prediction = await sendPredictionRequest(data);
+
+    stunting.name = request.body.name;
+    stunting.sex = data.sex;
+    stunting.age = data.age;
+    stunting.birth_weight = data.birth_weight;
+    stunting.birth_length = data.birth_length;
+    stunting.body_weight = data.body_weight;
+    stunting.body_length = data.body_length;
+    stunting.asi_eksklusif = data.asi_ekslusif;
+    stunting.status_stunting = prediction;
+
+    await stunting.save();
+
+    response
+      .status(200)
+      .json(
+        createSuccessResponse("Stunting data updated successfully", stunting)
+      );
+  } catch (error) {
+    console.log(error);
+    return response
+      .status(500)
+      .json(createErrorResponse("Internal server error"));
+  }
+};
+
+export const deleteStuntingById = async (request, response) => {
+  try {
+    const userId = request.params.userId;
+    const stuntingId = request.params.stuntingId;
+
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return response.status(200).json(createErrorResponse("User not found"));
+    }
+
+    const stunting = await Stunting.findOne({
+      where: { id: stuntingId, user_id: userId },
+    });
+
+    if (!stunting) {
+      return response
+        .status(200)
+        .json(createErrorResponse("Stunting data not found"));
+    }
+
+    await stunting.destroy();
+
+    response
+      .status(200)
+      .json(createSuccessResponse("Stunting data deleted successfully"));
+  } catch (error) {
+    console.log(error);
+    return response
+      .status(500)
+      .json(createErrorResponse("Internal server error"));
+  }
+};
