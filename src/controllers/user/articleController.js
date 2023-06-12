@@ -78,3 +78,38 @@ export const getArticleById = async (request, response) => {
     response.status(500).json(createErrorResponse("Internal server error"));
   }
 };
+
+export const getPinnedArticle = async (request, response) => {
+  try {
+    const pinnedArticle = await Article.findOne({
+      attributes: [
+        "id",
+        "title",
+        "content",
+        "image_url",
+        "label",
+        "published_at",
+        "author",
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (!pinnedArticle) {
+      return response
+        .status(200)
+        .json(createErrorResponse("Pinned Article Not Found"));
+    }
+
+    response
+      .status(200)
+      .json(
+        createSuccessResponse(
+          "Fetch pinned article successfully",
+          pinnedArticle
+        )
+      );
+  } catch (error) {
+    console.log(error);
+    response.status(500).json(createErrorResponse("Internal server error"));
+  }
+};

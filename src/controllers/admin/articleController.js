@@ -8,8 +8,8 @@ export const createArticle = async (request, response) => {
     await Article.create({
       title,
       content,
-      image_url,
       label,
+      image_url,
       published_at,
       author,
     });

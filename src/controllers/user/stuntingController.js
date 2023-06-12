@@ -76,6 +76,7 @@ export const getAllStuntingByUserId = async (request, response) => {
 
     const stunting = await Stunting.findAll({
       where: { user_id: userId },
+      order: [["createdAt", "DESC"]],
     });
 
     if (!stunting || stunting.length === 0) {

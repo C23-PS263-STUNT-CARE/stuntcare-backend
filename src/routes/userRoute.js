@@ -14,6 +14,7 @@ import {
 import {
   getArticleById,
   getArticles,
+  getPinnedArticle,
 } from "../controllers/user/articleController.js";
 
 import { getInfo } from "../controllers/user/infoController.js";
@@ -25,6 +26,7 @@ router.post("/api/register", register);
 router.post("/api/login", login);
 
 /* Article */
+router.get("/api/v1/pinArticle", verifyToken, getPinnedArticle);
 router.get("/api/v1/articles", verifyToken, getArticles);
 router.get("/api/v1/articles/:articleId", verifyToken, getArticleById);
 
