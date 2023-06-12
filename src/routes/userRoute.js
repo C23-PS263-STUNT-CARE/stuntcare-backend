@@ -36,8 +36,20 @@ router.get("/api/v1/info", verifyToken, getInfo);
 /* Stunting */
 router.post("/api/v1/cek/:userId", verifyToken, cekStunting);
 router.get("/api/v1/history/:userId", verifyToken, getAllStuntingByUserId);
-router.get("/api/v1/stunting/:userId/:stuntingId", getStuntingById);
-router.put("/api/v1/stunting/:userId/:stuntingId", editStuntingById);
-router.delete("/api/v1/stunting/:userId/:stuntingId", deleteStuntingById);
+router.get(
+  "/api/v1/stunting/:userId/:stuntingId",
+  verifyToken,
+  getStuntingById
+);
+router.put(
+  "/api/v1/stunting/:userId/:stuntingId",
+  verifyToken,
+  editStuntingById
+);
+router.delete(
+  "/api/v1/stunting/:userId/:stuntingId",
+  verifyToken,
+  deleteStuntingById
+);
 
 export default router;
