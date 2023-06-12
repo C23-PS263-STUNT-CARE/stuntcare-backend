@@ -22,6 +22,11 @@ export const getArticles = async (request, response) => {
         ],
         order: [["createdAt", "DESC"]],
         limit: parseInt(latest),
+        where: {
+          id: {
+            [Op.ne]: 1,
+          },
+        },
       });
     } else {
       articles = await Article.findAll({
@@ -34,6 +39,11 @@ export const getArticles = async (request, response) => {
           "published_at",
           "author",
         ],
+        where: {
+          id: {
+            [Op.ne]: 1,
+          },
+        },
       });
     }
 
