@@ -101,7 +101,9 @@ export const getPinnedArticle = async (request, response) => {
         "published_at",
         "author",
       ],
-      order: [["createdAt", "DESC"]],
+      where: {
+        id: 1, // ID artikel yang ingin Anda ambil
+      },
     });
 
     if (!pinnedArticle) {
