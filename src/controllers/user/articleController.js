@@ -4,6 +4,8 @@ import {
   createSuccessResponse,
 } from "../../utils/responseUtil.js";
 
+import { Op } from "sequelize";
+
 export const getArticles = async (request, response) => {
   try {
     const { latest } = request.query;
